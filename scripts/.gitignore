@@ -1,2 +1,2 @@
 *.pyc
-/pre/*
+scripts/*.sh
