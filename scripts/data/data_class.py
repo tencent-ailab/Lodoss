@@ -12,25 +12,22 @@ class DataSetModule(LightningDataModule):
         self.dataset = None
         self.args = args
         self.tokenizer = tokenizer
-        # self.prepare_data_per_node = True
 
     def setup(self, stage=None):
-        self.dataset = load_from_disk(os.path.join(self.args.data_dir,
-                                                   self.args.data_set, self.args.hf_dir))
+        self.dataset = load_from_disk(os.path.join(self.args.data_dir, self.args.data_set))
 
     def _get_dataloader(self, split_name):
         """Get training and validation dataloaders"""
         is_train = True if 'train' in split_name else False
         dataset_split = self.dataset[split_name]
-        dataset = SummarizationDataset(dataset=dataset_split,
-                                       tokenizer=self.tokenizer, args=self.args)
-        # sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=is_train)
+        dataset = SummarizationDataset(dataset=dataset_split, tokenizer=self.tokenizer, args=self.args)
+        sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=is_train)
         collate_fn = SummarizationDataset.collate_fn if is_train else SummarizationDataset.collate_fn_test
         return DataLoader(dataset,
                           batch_size=self.args.batch_size,
-                          shuffle=is_train,
+                          shuffle=False,
                           num_workers=self.args.num_workers,
-                          # sampler=sampler,
+                          sampler=sampler,
                           collate_fn=collate_fn)
 
     def train_dataloader(self):

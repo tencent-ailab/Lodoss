@@ -4,10 +4,8 @@ from torch.utils.data import Dataset
 
 
 class SummarizationDataset(Dataset):
-    """Dataset Wrapper. It handles tokenization, max input/output seqlen, padding and batching"""
-
-    def __init__(self, tokenizer, args):
-        # self.dataset = dataset
+    def __init__(self, dataset, tokenizer, args):
+        self.dataset = dataset
         self.tokenizer = tokenizer
         self.cls_token = self.tokenizer.cls_token
         self.cls_token_id = self.tokenizer.cls_token_id
@@ -22,13 +20,12 @@ class SummarizationDataset(Dataset):
 
     def __getitem__(self, idx):
         data = self.dataset[idx]
-        # article_id, abstract_list, section_list, section_names, selected_ids
+        # keys: article_id, abstract_list, section_list, section_names, selected_ids
         section_list = data['section_list']
         summary = data['abstract_list']
         oracle_ids = data['selected_ids']
 
         sentences = [sent for section in section_list for sent in section]
-        # sentences_ids = [i for i in range(len(sentences))]
 
         # input
         entry_text = f'{self.sep_token}{self.cls_token}'.join(sentences)
@@ -44,7 +41,6 @@ class SummarizationDataset(Dataset):
         # summary label
         summary_label = np.asarray([0 for section in section_list for _ in range(len(section))])
         summary_label[oracle_ids] = 1
-        # summary_label = summary_label[sentences_ids]
         label_sum = list(summary_label)
 
         # segment label

@@ -1,3 +1,54 @@
+
+# SUM train - pubmed
+python run_long_summ.py --train_on --batch_size 16 --grad_accum 4 --epochs 20  --grad_ckpt --data_dir /data1/swcho/data/
+--data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+--model_name allenai/longformer-base-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+ --increasing_window_size --fp16 --sort_sum_pred --max_input_len 16384 --is_longer_seq --save_top_k 3
+ --every_n_train_steps 4
+
+# SUM test
+python run_long_summ.py --test_on --batch_size 4 --grad_accum 1 --epochs 1  --grad_ckpt --data_dir /data1/swcho/data/
+ --data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+ --model_name allenai/longformer-base-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+   --increasing_window_size --fp16 --sort_sum_pred --max_input_len 16384 --is_longer_seq
+   --from_pretrained  /data2/swcho_data/best_models/pubmed/base_16K_SUM_epoch=4-step=5144.ckpt --gpus 0
+
+
+# SS train
+python run_long_summ.py --train_on --batch_size 16 --grad_accum 4 --epochs 20  --grad_ckpt --data_dir /data1/swcho/data/
+--data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+--model_name allenai/longformer-base-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+ --increasing_window_size --fp16 --seg_label_pos -1 --sort_sum_pred --max_input_len 16384 --is_longer_seq
+ --is_seg --save_top_k 3 --every_n_train_steps 4
+
+# SS test
+python run_long_summ.py --train_on --batch_size 4 --grad_accum 1 --epochs 1  --grad_ckpt --data_dir /data1/swcho/data/
+--data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+--model_name allenai/longformer-base-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+ --increasing_window_size --fp16 --seg_label_pos -1 --sort_sum_pred --max_input_len 16384 --is_longer_seq
+ --is_seg --from_pretrained  /data2/swcho_data/best_models/pubmed/base_16K_SUM_epoch=4-step=5144.ckpt
+
+
+# SSD train
+python run_long_summ.py --train_on --batch_size 2 --grad_accum 16 --epochs 20  --grad_ckpt --data_dir /data1/swcho/data/
+--data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+--model_name allenai/longformer-large-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+ --increasing_window_size --seg_label_pos -1 --sort_sum_pred --max_input_len 16384 --is_longer_seq
+ --is_seg --is_dpp --dpp_weight 0.1 --save_top_k 3 --every_n_train_steps 4
+
+# SSD test
+python run_long_summ.py --train_on --batch_size 4 --grad_accum 1 --epochs 1  --grad_ckpt --data_dir /data1/swcho/data/
+--data_set pubmed_16k --hf_dir pubmed --num_sent_inf 7 --local_backbone_dir /data1/swcho/pretrained_models/
+--model_name allenai/longformer-large-4096 --limit_train_batches 1.0 --limit_val_batches 1.0 --limit_test_batches 1.0
+ --increasing_window_size --seg_label_pos -1 --sort_sum_pred --max_input_len 16384 --is_longer_seq
+ --is_seg --is_dpp --dpp_weight 0.1 --from_pretrained
+ /data2/swcho_data/best_models/pubmed/base_16K_SUM_epoch=4-step=5144.ckpt
+
+arxiv
+sent=5
+
+
+
 # [Arxiv]
 # epoch: 12, warmup: 0.083 (=1/12) => increase epoch 20 / warmup 0.1
 # [Pubmed]

@@ -1,9 +1,9 @@
+import os
 import torch.nn as nn
 import numpy as np
 import evaluate
 
 from .pl_model import Summarizer
-from ..utils import print_stats_core, print_rank_0
 
 
 class LongDocSummarizer(Summarizer):
@@ -12,10 +12,10 @@ class LongDocSummarizer(Summarizer):
         self.args = args
         self.model = model
         self.tokenizer = tokenizer
-        self.rouge_eval = evaluate.load(f'{self.args.cache_eval_dir}/rouge') # , use_stemmer=True)
+        self.rouge_eval = evaluate.load(f'{self.args.cache_eval_dir}/rouge')
 
     def forward(self, input_ids, cls_ids, mask_cls, sent_sum_labels, sent_seg_labels):
-        return self.model(input_ids, cls_ids, mask_cls, sent_sum_labels)
+        return self.model(input_ids, cls_ids, mask_cls, sent_sum_labels, sent_seg_labels)
 
     def training_step(self, batch, batch_idx):
         outputs = self.forward(*batch)
@@ -65,7 +65,7 @@ class LongDocSummarizer(Summarizer):
             if not in_text:
                 continue
             
-            sent_limit = len(summary) if self.args.num_sent_inf == -1 else self.arg.num_sent_inf
+            sent_limit = len(summary) if self.args.num_sent_inf == -1 else self.args.num_sent_inf
             
             _pred_pid = []
             for pid in pids:
@@ -94,56 +94,61 @@ class LongDocSummarizer(Summarizer):
     def common_step(self, batch):
         outputs = self.forward(*batch[:-3])
         loss = outputs['loss']
-
-        input_ids, cls_ids, mask_cls, sent_sum_labels, input_text, summary, index = batch
+        input_ids, cls_ids, mask_cls, sent_sum_labels, sent_seg_labels, input_text, summary, index = batch
         preds_sum_ids = self.get_prediction_ids(outputs, mask_cls, sent_sum_labels)
         preds, refs = self.get_prediction_text(preds_sum_ids, input_text, summary)
         return loss, preds, refs
 
     def common_epoch(self, outputs, split='val'):
         total_loss, total_norm = 0, 0
-        preds_sent_cnt, preds_word_cnt = [], []
+        preds_word_cnt = []
         for loss, predictions, references in outputs:
             total_loss += loss
             total_norm += 1
-            n_sent, n_word = self.compute_metrics(predictions, references)
-            preds_sent_cnt += n_sent
+            n_word = self.compute_metrics(predictions, references)
             preds_word_cnt += n_word
         avg_loss = total_loss / total_norm
         log = dict()
         log[f"{split}_loss"] = avg_loss
-
-        n_sent = print_stats_core(preds_sent_cnt, 'preds_sent_cnt')
-        for k, v in n_sent.items():
-            log[f'{split}_sent_' + k] = v
-        n_word = print_stats_core(preds_word_cnt, 'preds_word_cnt')
-        for k, v in n_word.items():
-            log[f'{split}_word_' + k] = v
+        log[f"{split}_num_word"] = np.mean(preds_word_cnt)
 
         rouge_scores = self.rouge_eval.compute(use_stemmer=True)
         for k, v in rouge_scores.items():
             log[k] = v
         log['rouge_avg'] = (rouge_scores['rouge1'] + rouge_scores['rouge2'] + rouge_scores['rougeLsum']) / 3
         self.log_dict(log)
-        print_rank_0(log)
+        print(log)
+
+        if self.args.save_summary:
+            predictions = []
+            for loss, pred, ref in outputs:
+                pred_str = [' '.join(pr).strip() for pr in pred]
+                pred_str = [pr for pr in pred_str if pr]
+                predictions.extend(pred_str)
+            summ_path = './summary'
+            if not os.path.exists(summ_path):
+                os.makedirs(summ_path)
+            with open(os.path.join(summ_path, 'predicted_summary.txt'), 'w') as f:
+                for line in predictions:
+                    f.write(line + '\n')
+
         return {'log': log}
 
     def compute_metrics(self, prediction, reference):
-        preds_sent_cnt = [len(sents) for sents in prediction]
         preds_word_cnt = [len(' '.join(sents).split()) for sents in prediction]
         decoded_preds = ["\n".join(pred) for pred in prediction]
         decoded_labels = ["\n".join(ref) for ref in reference]
 
         self.rouge_eval.add_batch(predictions=decoded_preds, references=decoded_labels)
-        return preds_sent_cnt, preds_word_cnt
+        return preds_word_cnt
 
-    def validation_step(self, batch):
+    def validation_step(self, batch, batch_idx):
         return self.common_step(batch)
 
     def validation_epoch_end(self, outputs):
         return self.common_epoch(outputs, 'val')
     
-    def test_step(self, batch):
+    def test_step(self, batch, batch_idx):
         return self.common_step(batch)
 
     def test_epoch_end(self, outputs):
