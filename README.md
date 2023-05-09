@@ -11,14 +11,14 @@ Our paper, ["Toward Unifying Text Segmentation and Long Document Summarization"]
     }
 
 ## Quick Links
-  - [Overview](#overview)
-  - [Environment](#environment)
-  - [Data](#data)
-  - [Train](#train)
-  - [Checkpoint](#checkpoint)
-  - [Inference](#inference)
+  - [Overview](#overview-)
+  - [Environment](#environment-)
+  - [Data](#data-)
+  - [Train](#train-)
+  - [Checkpoint](#checkpoint-️)
+  - [Inference](#inference-)
 
-## Overview
+## Overview 🔭
 We propose a method learning robust sentence representations by performing summarization and segmentation simultaneously,
 which is further enhanced by an optimizationbased regularizer to promote selection of diverse summary sentences.
 
