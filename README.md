@@ -46,8 +46,11 @@ install
 the corresponding packages)
 
 ## Data 💾
-We provide the processed data: [PubMed](https://tencentoverseas-my.sharepoint.com/:u:/g/personal/swcho_global_tencent_com/EWh56at2ViNCpq0iyIZ1D8gBXFPFVs-ake58VinzbjRQsQ?e=RTtQwE), [arXiv](https://tencentoverseas-my.sharepoint.com/:u:/g/personal/swcho_global_tencent_com/EaPgWveSHbdCrPERMvW4z5EBYuSqU6FcSJq17Mq1Vbih4w?e=NBsSQk)
-* Original dataset can be downloaded from [repo](https://github.com/armancohan/long-summarization)
+We provide the processed data: [PubMed](https://tencentoverseas-my.sharepoint.com/:u:/g/personal/swcho_global_tencent_com/EWh56at2ViNCpq0iyIZ1D8gBXFPFVs-ake58VinzbjRQsQ?e=RTtQwE),
+[arXiv](https://tencentoverseas-my.sharepoint.com/:u:/g/personal/swcho_global_tencent_com/EaPgWveSHbdCrPERMvW4z5EBYuSqU6FcSJq17Mq1Vbih4w?e=NBsSQk), 
+[VT-SSum](https://tencentoverseas-my.sharepoint.com/:u:/g/personal/swcho_global_tencent_com/ETflOwBVTktClHR9lH5xJ8oBY304Bz_EFRTJ2fexvNpTHQ?e=dS1vrz) 
+* Original dataset can be downloaded from [PubMed, arXiv](https://github.com/armancohan/long-summarization), or 
+  [VT-SSum](https://github.com/Dod-o/VT-SSum)
 * Dataset format is based on [Hugging Face Datasets](https://huggingface.co/docs/datasets/index).
 * Keys for data instance
   * ```article_id```: str
